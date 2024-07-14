@@ -1,0 +1,47 @@
+[                GameObject 클래스                  ]
+
+#Description : Object 속성 정의 및 Canvas 좌표 매핑
+
+#속성
+point : vector2D
+coordinate : 좌표계
+
+-------------------------------------------------------------------
+#메서드 
+
+draw : 오버라이드용
+
+-------------------------------------------------------------------
+좌표 매핑 : 자기 참조연산 수행
+
+mapCoordLB2Canvas(canvas) 
+=> 현재 백터를 canvas 좌표계로 매핑합니다
+
+mapCoordCanvas2LB(canvas)
+=> 현재 벡터를 LB 좌표계로 매핑합니다.
+
+GameObject.mapCoordLB2CanvasAll(canvas,...objs)
+=> 오브젝트 여러 개를 canvas 좌표계로 일괄 변경
+
+GameObject.mapCoordCanvas2LBAll(canvas,...objs)
+=> 오브젝트 여러 개를 LB 좌표계로 일괄 변경
+
+GameObject.mapCoordLB2CanvasFromList(canvas,objs)
+=> 오브젝트 배열을 canvas 좌표계로 일괄 변경
+
+GameObject.mapCoordCanvas2LBFromList(canvas,objs)
+=> 오브젝트 배열을 LB 좌표계로 일괄 변경
+
+
+-------------------------------------------------------------------
+#파생 클래스
+
+Ball(x,y,radius,color);
+
+Paddle(x,y,width,height,color);
+
+Block(x,y,width,height,color);
+
+각 클래스는 draw 메서드 오버라이드 수행
+
+-------------------------------------------------------------------

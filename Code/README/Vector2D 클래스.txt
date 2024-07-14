@@ -1,0 +1,50 @@
+[                Vector2D 클래스               ]
+
+#Description : 기본 vector 연산
+
+#속성
+x,y : 벡터 요소
+
+-------------------------------------------------------------------
+#생성
+
+let p1 = new Vector2D(x,y); : (number, number)
+//(LB 좌표) (x,y)벡터
+
+let p2 = new Vector2D(length,"degree"); : (number, string)
+//(LB좌표:극좌표계=>유클리드 좌표계) (r,theta) => (x,y)벡터
+
+-------------------------------------------------------------------
+#메서드
+
+연산 : 인자로 받은 벡터와 연산한 값 반환
+
+add(vec) : Vector2D | undefined
+sub(vec) : Vector2D | undefined
+mul(scalar) : Vector2D | undefined
+
+dot(vec) : scalar | undefined 
+=>내적
+
+mag() : number
+=> 백터 크기
+
+normalize() : Vector2D
+=> 단위 벡터
+
+angle() : radian
+=> x축과 벡터가 이루는 각
+
+Vector2D.angleBetween(vec1,vec2) : radian
+=> 두 벡터가 이루는 각
+
+rotate(degree) : Vector2D
+=> 벡터 회전
+
+-------------------------------------------------------------------
+기타
+
+errMsg(message)
+copy() : Vector2D
+
+-------------------------------------------------------------------
