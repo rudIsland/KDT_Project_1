@@ -1,0 +1,14 @@
+.canvas {
+    min-width: 620px;
+    min-height: 820px;
+    position: relative;
+    margin: auto;
+}
+.wall {
+    border: 2px solid #000; /* 검정색 테두리 */
+    width: 600px;
+    height: 800px;
+    position: relative;
+    margin: 10px auto;
+    background-color: #f8f9fa;
+}
