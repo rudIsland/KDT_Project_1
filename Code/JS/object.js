@@ -91,13 +91,14 @@ class Paddle extends GameObject{
 
 /* 벽돌 */
 class Block extends GameObject{
-    constructor(x,y,width,height,color){
+    constructor(x,y,width,height,life){
         super(x,y);
         this.width = width;
         this.height = height;
-        this.color = color;
-        this.life = 1;
+        this.life = life;
     }
+    //생명 종속
+    static color = ["#007bff","#8ed973","#fdff9f","#ff9393","#78206e"];
 
     setLife(value){
         this.life=value;
@@ -106,7 +107,7 @@ class Block extends GameObject{
     draw(ctx){
         ctx.beginPath();
         ctx.rect(this.point.x, this.point.y, this.width, this.height);
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = Block.color[this.life-1];
         ctx.fill();
         ctx.closePath();
     }

@@ -77,7 +77,7 @@ $(document).ready(function(){
             for (let col = 0; col < 7; col++) {
                 let blockX = col * (75 + 5) + 30;
                 let blockY = canvas.height - (row * (30 + 5) + 30);
-                let block = new Block(blockX, blockY, 75, 30,"#007bff");
+                let block = new Block(blockX, blockY, 75, 30,2);
                 blocks.push(block);
             }
         }
