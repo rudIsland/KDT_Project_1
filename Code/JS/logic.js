@@ -172,8 +172,10 @@ $(document).ready(function(){
         //위쪽 벽
         if (canvas.height - ball.radius < ball.point.y + dirVec.y) {
             dirVec.y = -dirVec.y; //dy = -dy
-        } else if (ball.point.y+dirVec.y-ball.radius < paddle.point.y ) { //받침대와 충돌여부
-            if (ball.point.x > paddle.point.x && ball.point.x < paddle.point.x + paddle.width) {
+        } 
+        //아래쪽 벽
+        else if (ball.point.y+dirVec.y-ball.radius +25< paddle.point.y ) { //받침대와 충돌여부
+            if (ball.point.x > paddle.point.x && ball.point.x < paddle.point.x + paddle.width +35) {
                 dirVec.y = -dirVec.y;
             } else { //만약 패들 밑 바닥에 부딪힐경우 이벤트
                 cutLife();
