@@ -33,8 +33,16 @@ $(document).ready(function(){
         let paddleY = paddleHeight + 10;
         paddle = new Paddle(paddleX, paddleY, paddleWidth, paddleHeight,"#007bff");
 
-        //벽돌
+        
+        //벽돌 테스트용 코드
         blocks = new Array();
+        let block1 = new Block(canvas.width/2,canvas.height/2*1.5,75,30,"#007bff");
+        let block2 = new Block(canvas.width/2,canvas.height/2*1.5+50,75,30,"#007bff");
+        blocks.push(block1);
+        blocks.push(block2);
+
+        //벽돌
+        /*
         for (let row = 0; row < 3; row++) {
             for (let col = 0; col < 7; col++) {
                 let blockX = col * (75 + 5) + 30;
@@ -43,12 +51,13 @@ $(document).ready(function(){
                 blocks.push(block);
             }
         }
+        */
 
         //오브젝트 관리용 배열
         objects = new Array();
         objects.push(ball);
         objects.push(paddle);    
-        blocks.forEach((block)=>{
+        blocks.forEach((block)=>{ //2~
             objects.push(block);
         });
     }
@@ -111,10 +120,36 @@ $(document).ready(function(){
             paddle.point = paddle.point.add(new Vector2D(-paddle_v,0));
         }
 
-        //block 충돌 미구현
-        
+        let brokenBlockIndex = null;
+        //block 충돌
+        for(let i=0;i<blocks.length;++i){
+            let block = blocks[i];
+            /* left_right 충돌 */
+            if(ball.point.y<=block.point.y&&ball.point.y>=block.point.y-block.height){
+                if(ball.point.x>=block.point.x-ball.radius
+                    &&ball.point.x<=block.point.x+ball.radius)
+                {
+                    dirVec.x = -dirVec.x;
+                    brokenBlockIndex = i;
+                    break;
+                };
+            }
+            /* top_bottom 충돌 */
+            if(ball.point.x>=block.point.x&&ball.point.x<=block.point.x+block.width){
+                if(ball.point.y>=block.point.y-block.height-ball.radius 
+                    &&ball.point.y<=block.point.y+ball.radius)
+                {
+                    dirVec.y = -dirVec.y;
+                    brokenBlockIndex = i;
+                    break;
+                };
+            }
+        }
+        if(brokenBlockIndex!=null){
+            blocks.splice(brokenBlockIndex,1);
+            objects.splice(2+brokenBlockIndex,1); //오브젝트에서 제거
+        }
     }
-
     /******************************canvas 그리기**********************************/
 
     //draw -> update 수정
@@ -126,6 +161,12 @@ $(document).ready(function(){
         objects.forEach((object)=>{ 
             object.draw(ctx);
         });
+
+        //임시 게임 종료
+        if(blocks.length==0){
+            console.log("Win");
+            return;
+        }
         
         //값의 변경을 위해 LB 좌표계로 변환
         GameObject.mapCoordCanvas2LBFromList(canvas,objects);
