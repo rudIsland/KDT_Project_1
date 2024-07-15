@@ -108,7 +108,7 @@ class Vector2D{
 
     normalize(){ //단위 벡터
         let mag = this.mag();
-        return this.mul(1/mag);
+        return (mag==0)? this.mul(0) : this.mul(1/mag);
     }//return Vector2D
 
     angle(){ 

@@ -1,5 +1,5 @@
 import { Vector2D } from "./vector.js"
-export { GameObject, Ball, Paddle, Block, Vector2D };
+export { GameObject, Ball, Paddle, Block, Line, Vector2D };
 
 class GameObject{
     constructor(x,y){
@@ -109,6 +109,48 @@ class Block extends GameObject{
         ctx.rect(this.point.x, this.point.y, this.width, this.height);
         ctx.fillStyle = Block.color[this.life-1];
         ctx.fill();
+        ctx.closePath();
+    }
+}
+
+/* 선 */
+class Line extends GameObject{
+    constructor(sx,sy,ex,ey,color){
+        super(0,0);
+        this.start = new Vector2D(sx,sy);
+        this.end = new Vector2D(ex,ey);
+        this.color = color;
+    }
+
+    //Object의 메서드 오버라이드
+    mapCoordLB2Canvas(canvas){ 
+        let start = this.start;
+        let end = this.end;
+        if(this.coordinate =="LeftBottom origin"&&typeof canvas == "object"){
+            let height = canvas.height;
+            start.y = height - start.y;
+            end.y = height - end.y;
+            this.coordinate = "Canvas origin";
+        }
+    }//change origin LeftBottom to Canvas
+
+    mapCoordCanvas2LB(canvas){
+        let start = this.start;
+        let end = this.end;
+        if(this.coordinate=="Canvas origin"&&typeof canvas == "object"){
+            let height = canvas.height;
+            start.y = (start.y - height)*-1;
+            end.y = (end.y - height)*-1;
+            this.coordinate = "LeftBottom origin";
+        }
+    }//change origin Canvas to LeftBottom
+
+    draw(ctx){
+        ctx.beginPath();
+        ctx.moveTo(this.start.x,this.start.y);
+        ctx.lineTo(this.end.x,this.end.y);
+        ctx.strokeStyle = this.color;
+        ctx.stroke();
         ctx.closePath();
     }
 }

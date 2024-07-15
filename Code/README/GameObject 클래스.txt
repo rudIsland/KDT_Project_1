@@ -40,7 +40,9 @@ Ball(x,y,radius,color);
 
 Paddle(x,y,width,height,color);
 
-Block(x,y,width,height,color);
+Block(x,y,width,height,life);
+
+Line(sx,sy,ex,ey,color);
 
 각 클래스는 draw 메서드 오버라이드 수행
 

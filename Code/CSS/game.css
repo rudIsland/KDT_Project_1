@@ -12,16 +12,18 @@
 }
 .canvas{
     width : 580px;
-    height : 550px;
+    height : 500px;
     background: #ccc;
     border-radius: 20px;
     display: block;
     margin: 10px auto;
 }
 .wall {
+    /* 계산 시 offset이 달라져서 content-box로 적용합니다. */ 
+    box-sizing: content-box; 
     border: 2px solid #000; /* 검정색 테두리 */
-    width: 420px;
-    height: 520px;
+    width: 400px;
+    height: 420px;
     /* position: relative;*/
     margin: 10px auto;
     background-color: #f8f9fa;

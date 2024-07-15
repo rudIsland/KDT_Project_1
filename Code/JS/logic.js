@@ -1,15 +1,15 @@
-import {GameObject, Ball, Paddle, Block, Vector2D} from "./object.js"
+import {GameObject, Ball, Paddle, Block, Line, Vector2D} from "./object.js"
 
 $(document).ready(function(){
     const canvas = document.getElementById("wall");
     const ctx = canvas.getContext("2d");
-    canvas.width = 600;
-    canvas.height = 800;
+    canvas.width = 400; //css와 비율 맞춤
+    canvas.height = 420;
 
     /******************************게임 설정 데이터**********************************/
     let maxLife = null; let life = null; 
     let score = null; let scoreGap = null;
-    let level = 1;
+    let level = 1; let velocity = 5.0;
 
     function addScore(){
         score += scoreGap;
@@ -39,26 +39,23 @@ $(document).ready(function(){
 
     let ball = null; let dirVec = null; 
     let paddle = null; let blocks = null;
-    let objects = []; //모든 오브젝트
+    let objects = []; //모든 오브젝트 
+    const maxRadius = 99999999;
 
     //공의 위치 초기화
     function initBallPosition(){
         //공
-        let ballRadius = 20;
+        let ballRadius = 10%(maxRadius+1);
         let x = canvas.width / 2;
-        let y = canvas.height / 2;
+        let y = canvas.height / 2 - 150;
         if(ball==null){
             ball = new Ball(x,y,ballRadius,"#007bff");
         }
         else{
             ball.point=new Vector2D(x,y);
         }
-        //공의 방향 및 속도 조절
-        let dx = (Math.random() * 2 - 1) * 4;
-        let dy = 4; 
-        let velocity = 6.0; //속도 조절 상수
-        //길이 1의 방향벡터로 만든 뒤 속도 조절 상수 곱
-        dirVec = new Vector2D(dx,dy).normalize().mul(velocity); 
+        //초기 공의 방향 0
+        dirVec = new Vector2D(0,0); 
     }
 
     function initObject(){
@@ -66,19 +63,25 @@ $(document).ready(function(){
         initBallPosition();
         
         //받침대
-        let paddleHeight = 20;
-        let paddleWidth = 100;
+        let paddleHeight = 15;
+        let paddleWidth = 80;
         let paddleX = (canvas.width - paddleWidth) / 2;
         let paddleY = paddleHeight + 10;
         paddle = new Paddle(paddleX, paddleY, paddleWidth, paddleHeight,"#007bff");
 
         //벽돌
         blocks = new Array();
-        for (let row = 0; row < 3; row++) {
-            for (let col = 0; col < 7; col++) {
-                let blockX = col * (75 + 5) + 30;
-                let blockY = canvas.height - (row * (30 + 5) + 30);
-                let block = new Block(blockX, blockY, 75, 30, level); //벽돌생성
+        let max_row = 3;
+        let max_col = 7;
+        //max_col+1개의 gap : canvas_width*0.1
+        let gap = canvas.width*0.0123; 
+        let width = (canvas.width-(gap*(max_col+1)))/max_col;
+        let height = canvas.height*0.05;
+        for (let row = 0; row < max_row; row++) {
+            for (let col = 0; col < max_col; col++) {
+                let blockX = col * (width + gap) + gap;
+                let blockY = canvas.height - (row * (height + gap) + gap);
+                let block = new Block(blockX, blockY,width, height, level); //벽돌생성
                 blocks.push(block);
             }
         }
@@ -120,6 +123,57 @@ $(document).ready(function(){
         }
     }
 
+    //마우스 이벤트
+    let pressedMouse = false;
+    let pressedPoint = null;
+    let lineDir = null; //선의 방향
+
+    function getMousePoint(x,y){
+        let mp = new Ball(0,0,1,"#ffffff"); //기본 0,0
+        mp.mapCoordLB2Canvas(canvas); //canvas로 변환
+        mp.point = new Vector2D(x,y); //canvas 좌표넣기
+        mp.mapCoordCanvas2LB(canvas); //좌표계 변환
+        return mp.point.copy();
+    }
+
+    canvas.addEventListener("mousedown",(e)=>{
+        pressedPoint = getMousePoint(e.offsetX,e.offsetY);
+        //마우스 좌표와 원의 중심과의 거리
+        let dist=Math.sqrt(Math.pow(ball.point.x-pressedPoint.x,2)
+            +Math.pow(ball.point.y-pressedPoint.y,2));
+        //방향이 0이고 원의 내부에 마우스가 들어오면
+        if(dist<=ball.radius&&dirVec.x==0&&dirVec.y==0){
+            pressedMouse = true;
+        }
+    },false);
+
+    canvas.addEventListener("mousemove",(e)=>{ //마우스가 움직일 때마다 선을 계산
+        if(pressedMouse){
+            ball.mapCoordCanvas2LB(canvas);
+            pressedPoint = getMousePoint(e.offsetX,e.offsetY);
+            let lineLength = 150;
+            //공에서 마우스까지의 방향을 구합니다.
+            let dir = ball.point.mul(-1).add(pressedPoint).normalize().mul(lineLength);
+            //공에서 마우스까지의 역방향을 구합니다.
+            let invDir = ball.point.add(dir.rotate(180));
+            //마우스 역방향으로 선 생성
+            lineDir = new Line(ball.point.x,ball.point.y,invDir.x,invDir.y,"#ff0000");
+            lineDir.mapCoordLB2Canvas(canvas);
+        }
+    },false);
+
+    canvas.addEventListener("mouseup",(e)=>{  //벡터 결정
+        if(pressedMouse){
+            lineDir.mapCoordCanvas2LB(canvas);
+            //공의 방향 계산
+            dirVec=lineDir.start.mul(-1).add(lineDir.end).normalize().mul(velocity);
+            pressedMouse = false;
+            pressedPoint=null;
+            lineDir = null;
+        }
+    },false);
+
+    /******************************충돌 관리**********************************/
     //벽돌과 공의 충돌 감지
     function detectCollideWithBlock(ball,block){
         // 벽돌 영역의 경계
@@ -135,28 +189,45 @@ $(document).ready(function(){
         //공의 중심과 벽돌 사이의 거리
         let distX = ball.point.x - nearX; //경계 사이에 존재하면 0
         let distY = ball.point.y - nearY;
-        //상하좌우 영역 및 각 모서리와의 거리
+        //상하좌우 영역 거리
         let dist = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
-
-        if(dist<=ball.radius){ //충돌 판정
+        
+        //각 모서리와의 거리 지정
+        
+        const maxVal = maxRadius+1;
+        let tl = (ball.point.x<=blockLeft&&ball.point.y>=blockTop)
+            ?Math.sqrt(Math.pow(ball.point.x - blockLeft, 2) + Math.pow(ball.point.y - blockTop, 2)):maxVal;
+        let tr = (ball.point.x>=blockRight&&ball.point.y>=blockTop)
+            ?Math.sqrt(Math.pow(ball.point.x - blockRight, 2) + Math.pow(ball.point.y - blockTop, 2)):maxVal;
+        let bl = (ball.point.x<=blockLeft&&ball.point.y<=blockBottom)
+            ?Math.sqrt(Math.pow(ball.point.x - blockLeft, 2) + Math.pow(ball.point.y - blockBottom, 2)):maxVal;
+        let br = (ball.point.x>=blockRight&&ball.point.y<=blockBottom)
+            ?Math.sqrt(Math.pow(ball.point.x - blockRight, 2) + Math.pow(ball.point.y - blockBottom, 2)):maxVal;
+        
+            //모서리 지점과의 거리
+        let cornerDist = [ tl,tr,bl,br ];
+        let isCornerCollision = cornerDist.some((cdist)=> cdist <= ball.radius);
+        
+        //충돌 판정 : 상하좌우 충돌 | 모서리 충돌
+        if(dist<=ball.radius || isCornerCollision ){ 
+            //모서리 충돌 처리코드
+            if(isCornerCollision){
+                return "collide_corn";
+            }
 
             //공의 이동 방향
-            let movedLeft = Math.abs(ball.point.x - ball.radius - blockRight);
-            let movedRight = Math.abs(ball.point.x + ball.radius - blockLeft);
-            let movedBottom = Math.abs(ball.point.y - ball.radius - blockTop );
-            let movedTop = Math.abs(ball.point.y + ball.radius - blockBottom);
-            let movedMin = Math.min(movedLeft, movedRight, movedTop, movedBottom);
-            //충돌된 곳과 최소가 되는 방향 => 공의 이동방향
+            let movedLeft = ball.point.x - blockLeft;
+            let movedRight = blockRight - ball.point.x;
+            let movedBottom = ball.point.y - blockBottom;
+            let movedTop = blockTop - ball.point.y;
+            let movedMin = Math.min(movedLeft, movedRight,movedTop,movedBottom);
             
             //좌우 충돌 감지
             if (movedMin == movedLeft || movedMin == movedRight) 
                 return "collide_lr"; 
             //상하 충돌 감지
-            else if((movedMin == movedBottom || movedMin == movedTop)) 
+            else if(movedMin == movedTop || movedMin == movedBottom) 
                 return "collide_tb"; 
-            //모서리 충돌 감지
-            else
-                return "collide_corn";
         }
         else
             false;
@@ -164,6 +235,7 @@ $(document).ready(function(){
 
     //충돌 처리
     function detectCollision(){ 
+        let error = 35; /* 판정 오차 값 */
         //공이 왼쪽 또는 오른쪽 벽에 부딪히면 반대로 가도록 설정
         if (ball.point.x + dirVec.x > canvas.width - ball.radius 
             || ball.point.x + dirVec.x < ball.radius) 
@@ -175,8 +247,8 @@ $(document).ready(function(){
             dirVec.y = -dirVec.y; //dy = -dy
         } 
         //아래쪽 벽
-        else if (ball.point.y+dirVec.y-ball.radius +25< paddle.point.y ) { //받침대와 충돌여부
-            if (ball.point.x > paddle.point.x && ball.point.x < paddle.point.x + paddle.width +35) {
+        else if (ball.point.y+dirVec.y-ball.radius + error*0.5< paddle.point.y ) { //받침대와 충돌여부
+            if (ball.point.x > paddle.point.x-error && ball.point.x < paddle.point.x + paddle.width +error) {
                 dirVec.y = -dirVec.y;
             } else { //만약 패들 밑 바닥에 부딪힐경우 이벤트
                 cutLife();
@@ -223,8 +295,9 @@ $(document).ready(function(){
         }
         if(brokenBlockIndex!=null){
             addScore(); //점수추가
-            blocks.splice(brokenBlockIndex,1);
-            objects.splice(2+brokenBlockIndex,1); //오브젝트에서 제거
+            let block=blocks.splice(brokenBlockIndex,1)[0];
+            brokenBlockIndex=objects.indexOf(block);
+            objects.splice(brokenBlockIndex,1);
         }
     }
     /******************************canvas 그리기**********************************/
@@ -232,26 +305,29 @@ $(document).ready(function(){
     //draw -> update 수정
     function update(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         //그리기 위한 모든 오브젝트를 canvas 좌표계로 변환 
         GameObject.mapCoordLB2CanvasFromList(canvas,objects);
         objects.forEach((object)=>{ 
             object.draw(ctx);
         });
 
+        if(lineDir){ //방향선
+            lineDir.draw(ctx);
+        }
+        
+        //값의 변경을 위해 LB 좌표계로 변환
+        GameObject.mapCoordCanvas2LBFromList(canvas,objects);
+        
         //블럭을 모두 부셨을때 로직
         if(blocks.length==0){
             level++;
             initObject();
             console.log("Win");
         }
-        
-        //값의 변경을 위해 LB 좌표계로 변환
-        GameObject.mapCoordCanvas2LBFromList(canvas,objects);
 
         //충돌 처리
         detectCollision(); 
-
+        
         //방향 변경
         ball.point = ball.point.add(dirVec);
         requestAnimationFrame(update);
