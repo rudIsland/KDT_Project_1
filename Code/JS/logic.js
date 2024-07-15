@@ -9,6 +9,7 @@ $(document).ready(function(){
     /******************************게임 설정 데이터**********************************/
     let maxLife = null; let life = null; 
     let score = null; let scoreGap = null;
+    let level = 1;
 
     function addScore(){
         score += scoreGap;
@@ -77,7 +78,7 @@ $(document).ready(function(){
             for (let col = 0; col < 7; col++) {
                 let blockX = col * (75 + 5) + 30;
                 let blockY = canvas.height - (row * (30 + 5) + 30);
-                let block = new Block(blockX, blockY, 75, 30,2);
+                let block = new Block(blockX, blockY, 75, 30, level); //벽돌생성
                 blocks.push(block);
             }
         }
@@ -213,7 +214,10 @@ $(document).ready(function(){
                     dirVec.x = -dirVec.x;
                     dirVec.y = -dirVec.y;
                 }
-                brokenBlockIndex = i;
+                block.life--; // 벽돌 생명력 감소
+                if(block.life <= 0) { //벽돌의 생명이 다할경우
+                    brokenBlockIndex = i;
+                }
                 break;
             }
         }
@@ -235,10 +239,11 @@ $(document).ready(function(){
             object.draw(ctx);
         });
 
-        //게임 종료
+        //블럭을 모두 부셨을때 로직
         if(blocks.length==0){
+            level++;
+            initObject();
             console.log("Win");
-            return;
         }
         
         //값의 변경을 위해 LB 좌표계로 변환

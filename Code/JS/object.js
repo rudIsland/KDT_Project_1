@@ -98,7 +98,7 @@ class Block extends GameObject{
         this.life = life;
     }
     //생명 종속
-    static color = ["#007bff","#8ed973","#fdff9f","#ff9393","#78206e"];
+    static color = ["#007bff","#8ed973","#fc932a","#ff9393","#78206e"];
 
     setLife(value){
         this.life=value;
