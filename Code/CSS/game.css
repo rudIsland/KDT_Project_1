@@ -1,0 +1,28 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+#info{
+    display: grid;
+    justify-content: center;
+    grid-template-columns: 250px 250px;
+    border: 1px solid #ccc;
+}
+.canvas{
+    width : 580px;
+    height : 550px;
+    background: #ccc;
+    border-radius: 20px;
+    display: block;
+    margin: 10px auto;
+}
+.wall {
+    border: 2px solid #000; /* 검정색 테두리 */
+    width: 420px;
+    height: 520px;
+    /* position: relative;*/
+    margin: 10px auto;
+    background-color: #f8f9fa;
+}
