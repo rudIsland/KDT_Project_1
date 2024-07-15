@@ -33,16 +33,8 @@ $(document).ready(function(){
         let paddleY = paddleHeight + 10;
         paddle = new Paddle(paddleX, paddleY, paddleWidth, paddleHeight,"#007bff");
 
-        
-        //벽돌 테스트용 코드
-        blocks = new Array();
-        let block1 = new Block(canvas.width/2,canvas.height/2*1.5,75,30,"#007bff");
-        let block2 = new Block(canvas.width/2,canvas.height/2*1.5+50,75,30,"#007bff");
-        blocks.push(block1);
-        blocks.push(block2);
-
         //벽돌
-        /*
+        blocks = new Array();
         for (let row = 0; row < 3; row++) {
             for (let col = 0; col < 7; col++) {
                 let blockX = col * (75 + 5) + 30;
@@ -51,7 +43,6 @@ $(document).ready(function(){
                 blocks.push(block);
             }
         }
-        */
 
         //오브젝트 관리용 배열
         objects = new Array();
@@ -133,9 +124,8 @@ $(document).ready(function(){
                     brokenBlockIndex = i;
                     break;
                 };
-            }
-            /* top_bottom 충돌 */
-            if(ball.point.x>=block.point.x&&ball.point.x<=block.point.x+block.width){
+            }else if(ball.point.x>=block.point.x&&ball.point.x<=block.point.x+block.width){
+                /* top_bottom 충돌 */
                 if(ball.point.y>=block.point.y-block.height-ball.radius 
                     &&ball.point.y<=block.point.y+ball.radius)
                 {
