@@ -96,6 +96,11 @@ class Block extends GameObject{
         this.width = width;
         this.height = height;
         this.color = color;
+        this.life = 1;
+    }
+
+    setLife(value){
+        this.life=value;
     }
 
     draw(ctx){

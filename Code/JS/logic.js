@@ -6,25 +6,63 @@ $(document).ready(function(){
     canvas.width = 600;
     canvas.height = 800;
 
+    /******************************게임 설정 데이터**********************************/
+    let maxLife = null; let life = null; 
+    let score = null; let scoreGap = null;
+
+    function addScore(){
+        score += scoreGap;
+        $("#score").text(score);
+    }
+
+    function cutLife(){
+        life -= 1;
+        $("#life").text(life);
+    }
+
+    function initDataSetting(){
+        maxLife = 3;
+        $("#max_life").text(maxLife);
+        
+        life = maxLife;
+        $("#life").text(life);
+        
+        score = 0;
+        $("#score").text(score);
+        
+        scoreGap = 1;
+    }
+    initDataSetting();    
+
     /******************************오브젝트 관리**********************************/
 
     let ball = null; let dirVec = null; 
     let paddle = null; let blocks = null;
     let objects = []; //모든 오브젝트
 
-    function initObject(){
+    //공의 위치 초기화
+    function initBallPosition(){
         //공
         let ballRadius = 20;
         let x = canvas.width / 2;
         let y = canvas.height / 2;
-        ball = new Ball(x,y,ballRadius,"#007bff");
-
+        if(ball==null){
+            ball = new Ball(x,y,ballRadius,"#007bff");
+        }
+        else{
+            ball.point=new Vector2D(x,y);
+        }
         //공의 방향 및 속도 조절
         let dx = (Math.random() * 2 - 1) * 4;
         let dy = 4; 
         let velocity = 6.0; //속도 조절 상수
         //길이 1의 방향벡터로 만든 뒤 속도 조절 상수 곱
         dirVec = new Vector2D(dx,dy).normalize().mul(velocity); 
+    }
+
+    function initObject(){
+        //공
+        initBallPosition();
         
         //받침대
         let paddleHeight = 20;
@@ -81,16 +119,56 @@ $(document).ready(function(){
         }
     }
 
-    //충돌 감지 및 처리
-    function detectCollision(){ 
+    //벽돌과 공의 충돌 감지
+    function detectCollideWithBlock(ball,block){
+        // 벽돌 영역의 경계
+        let blockLeft = block.point.x;
+        let blockRight = block.point.x+block.width;
+        let blockTop = block.point.y;
+        let blockBottom = block.point.y-block.height;
 
+        //공의 중점과 영역 사이의 가까운 거리 구하기
+        let nearX = Math.max(blockLeft,Math.min(ball.point.x,blockRight));
+        let nearY = Math.max(blockBottom,Math.min(ball.point.y,blockTop));
+
+        //공의 중심과 벽돌 사이의 거리
+        let distX = ball.point.x - nearX; //경계 사이에 존재하면 0
+        let distY = ball.point.y - nearY;
+        //상하좌우 영역 및 각 모서리와의 거리
+        let dist = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
+
+        if(dist<=ball.radius){ //충돌 판정
+
+            //공의 이동 방향
+            let movedLeft = Math.abs(ball.point.x - ball.radius - blockRight);
+            let movedRight = Math.abs(ball.point.x + ball.radius - blockLeft);
+            let movedBottom = Math.abs(ball.point.y - ball.radius - blockTop );
+            let movedTop = Math.abs(ball.point.y + ball.radius - blockBottom);
+            let movedMin = Math.min(movedLeft, movedRight, movedTop, movedBottom);
+            //충돌된 곳과 최소가 되는 방향 => 공의 이동방향
+            
+            //좌우 충돌 감지
+            if (movedMin == movedLeft || movedMin == movedRight) 
+                return "collide_lr"; 
+            //상하 충돌 감지
+            else if((movedMin == movedBottom || movedMin == movedTop)) 
+                return "collide_tb"; 
+            //모서리 충돌 감지
+            else
+                return "collide_corn";
+        }
+        else
+            false;
+    }
+
+    //충돌 처리
+    function detectCollision(){ 
         //공이 왼쪽 또는 오른쪽 벽에 부딪히면 반대로 가도록 설정
         if (ball.point.x + dirVec.x > canvas.width - ball.radius 
             || ball.point.x + dirVec.x < ball.radius) 
         {
             dirVec.x = -dirVec.x; //dx = -dx
         }
-
         //위쪽 벽
         if (canvas.height - ball.radius < ball.point.y + dirVec.y) {
             dirVec.y = -dirVec.y; //dy = -dy
@@ -98,8 +176,13 @@ $(document).ready(function(){
             if (ball.point.x > paddle.point.x && ball.point.x < paddle.point.x + paddle.width) {
                 dirVec.y = -dirVec.y;
             } else { //만약 패들 밑 바닥에 부딪힐경우 이벤트
-                console.log("Game Over");
-                document.location.reload(); //initObject();
+                cutLife();
+                if(life==0){
+                    initDataSetting(); //게임 데이터 초기화
+                    initObject(); //오브젝트 초기화
+                }
+                else
+                    initBallPosition(); //공의 위치
             }
         }
 
@@ -111,31 +194,29 @@ $(document).ready(function(){
             paddle.point = paddle.point.add(new Vector2D(-paddle_v,0));
         }
 
-        let brokenBlockIndex = null;
         //block 충돌
+        let brokenBlockIndex = null;
         for(let i=0;i<blocks.length;++i){
             let block = blocks[i];
-            /* left_right 충돌 */
-            if(ball.point.y<=block.point.y&&ball.point.y>=block.point.y-block.height){
-                if(ball.point.x>=block.point.x-ball.radius
-                    &&ball.point.x<=block.point.x+ball.radius)
-                {
+
+            let collision = detectCollideWithBlock(ball,block);
+            if(collision){
+                if(collision == "collide_lr"){ //좌우 충돌
                     dirVec.x = -dirVec.x;
-                    brokenBlockIndex = i;
-                    break;
-                };
-            }else if(ball.point.x>=block.point.x&&ball.point.x<=block.point.x+block.width){
-                /* top_bottom 충돌 */
-                if(ball.point.y>=block.point.y-block.height-ball.radius 
-                    &&ball.point.y<=block.point.y+ball.radius)
-                {
+                }
+                else if("collide_tb"){ //상하 충돌
                     dirVec.y = -dirVec.y;
-                    brokenBlockIndex = i;
-                    break;
-                };
+                }
+                else{ //모서리 충돌
+                    dirVec.x = -dirVec.x;
+                    dirVec.y = -dirVec.y;
+                }
+                brokenBlockIndex = i;
+                break;
             }
         }
         if(brokenBlockIndex!=null){
+            addScore(); //점수추가
             blocks.splice(brokenBlockIndex,1);
             objects.splice(2+brokenBlockIndex,1); //오브젝트에서 제거
         }
@@ -152,7 +233,7 @@ $(document).ready(function(){
             object.draw(ctx);
         });
 
-        //임시 게임 종료
+        //게임 종료
         if(blocks.length==0){
             console.log("Win");
             return;
