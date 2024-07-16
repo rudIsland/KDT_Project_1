@@ -11,8 +11,7 @@
     <title>Broken Block</title>
 </head>
 <body>
-    <h2 class="h2 mt-3">Broken Block</h2>
-    <!--웹폰트로 수정하기(예정)-->
+    <h2 class="title mt-3">Broken Block</h2>
     <div class="intro" style="display: block;">
         <div class="canvas">
             <div id="introinfo">
@@ -30,31 +29,11 @@
                 / <span id="max_life"><!--생명최대치--></span></div>
             </div>
             <canvas class="wall" id="wall"></canvas>
+            <br>
         </div>
-        <button class="btn btn-outline-primary">Pause</button>
-        <button class="btn btn-outline-primary">Replay</button><!--버튼 : 부트스트랩 디자인-->
+        <button id="btnPause" class="btn btn-outline-primary">Pause</button>
+        <button id="btnReplay" class="btn btn-outline-primary">Replay</button><!--버튼 : 부트스트랩 디자인-->
     </div><!--플레이화면 : replay 클릭 시 인트로 화면으로-->
-    <script>
-        //인트로 -> 플레이화면 전환
-        //(현재)플레이화면은 단순히 숨겨져 있는 상태, (게임시작버튼을 누르기 전에 안보이는곳에서 자동으로 게임이 실행되고 있음), 시작버튼을 눌렀을때부터 플레이화면의 게임실행 로직 JS가 실행되도록 수정 필요
-        const playBtn = document.querySelector('#btnPlay');
-        const introDiv = document.querySelector('.intro');
-        const playDiv = document.querySelector('.play');
-        playBtn.addEventListener("click",playClick);
-        // onclick="playClick()"
-        function playClick() {
-            if (introDiv.style.display === 'block' && playDiv.style.display === 'none') {
-                introDiv.style.display = 'none';
-                playDiv.style.display = 'block';
-            } else {
-                introDiv.style.display = 'block';
-                playDiv.style.display = 'none';
-            }
-        }
-        //게임오버화면
-        //일시정지
-        //다시시작
-    </script>
     <script type="module" src="./JS/logic.js"></script>
 </body>
 </html>

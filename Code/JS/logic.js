@@ -5,7 +5,34 @@ $(document).ready(function(){
     const ctx = canvas.getContext("2d");
     canvas.width = 400; //css와 비율 맞춤
     canvas.height = 420;
+    
+    /******************************게임 실행 관련 이벤트**********************************/
 
+    //인트로 -> 플레이화면 전환
+    const playBtn = document.querySelector('#btnPlay');
+    const introDiv = document.querySelector('.intro');
+    const playDiv = document.querySelector('.play');
+    playBtn.addEventListener("click",playClick);
+    function playClick() {
+        if (introDiv.style.display === 'block' && playDiv.style.display === 'none') {
+            introDiv.style.display = 'none';
+            playDiv.style.display = 'block';
+        } else {
+            introDiv.style.display = 'block';
+            playDiv.style.display = 'none';
+        }
+    }
+    //게임오버화면
+    //일시정지
+    const pauseBtn = document.querySelector('#btnPause');
+
+    //다시시작
+    const replayBtn = document.querySelector('#btnReplay');
+    replayBtn.addEventListener("click",replayClick);
+    function replayClick(){
+        location.reload(); //페이지 새로고침
+    }
+    
     /******************************게임 설정 데이터**********************************/
     let maxLife = null; let life = null; 
     let score = null; let scoreGap = null;
