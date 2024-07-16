@@ -345,9 +345,10 @@ $(document).ready(function(){
         let brokenBlockIndex = null;
         for(let i=0;i<blocks.length;++i){
             let block = blocks[i];
-
+            
             let collision = detectCollideWithBlock(ball,block);
             if(collision){
+                block.hitBlock(); // 충돌 시 hit 상태로 변경
                 if(collision == "collide_lr"){ //좌우 충돌
                     dirVec.x = -dirVec.x;
                 }
@@ -404,6 +405,8 @@ $(document).ready(function(){
                 if(block.life <= 0) { //벽돌의 생명이 다할경우
                     brokenBlockIndex = i;
                 }
+                else //벽돌이 깨지지 않았을땐 카운트 한걸로 취급
+                    BoundsCount++;
                 break;
             }
         }

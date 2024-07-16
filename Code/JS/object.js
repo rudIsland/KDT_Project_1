@@ -96,6 +96,7 @@ class Block extends GameObject{
         this.width = width;
         this.height = height;
         this.life = life;
+        this.hit=false;
     }
     //생명 종속
     static color = ["#007bff","#8ed973","#fc932a","#ff9393","#78206e"];
@@ -105,11 +106,38 @@ class Block extends GameObject{
     }
 
     draw(ctx){
-        ctx.beginPath();
+        //기존 코드
+        /*ctx.beginPath();
         ctx.rect(this.point.x, this.point.y, this.width, this.height);
         ctx.fillStyle = Block.color[this.life-1];
         ctx.fill();
+        ctx.closePath();*/
+
+
+        ctx.save();
+        ctx.translate(this.point.x + this.width / 2, this.point.y + this.height / 2);
+        ctx.scale(this.scale, this.scale);
+        ctx.translate(-(this.point.x + this.width / 2), -(this.point.y + this.height / 2));
+        ctx.beginPath();
+        ctx.rect(this.point.x, this.point.y, this.width, this.height);
+        ctx.fillStyle = Block.color[this.life - 1];
+        ctx.fill();
         ctx.closePath();
+        ctx.restore();
+
+        if (this.hit) {
+            this.scale = 2.0; // 충돌 시 크기 증가
+            this.hit = false; // 한 프레임 후에 원래 상태로 되돌림
+        } else {
+            if (this.scale > 1.0) {
+                this.scale -= 0.1; // 원래 크기로 돌아옴
+            }
+        }
+    }
+
+     // 블럭 충돌 함수
+     hitBlock() {
+        this.hit = true;
     }
 }
 
