@@ -49,7 +49,7 @@ $(document).ready(function(){
         $("#life").text(life);
     }
 
-    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iMaxLife=3){
+    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iMaxLife=8){
         maxLife = iMaxLife;
         $("#max_life").text(maxLife);
         
@@ -125,6 +125,24 @@ $(document).ready(function(){
         });
     }
     initObject();
+
+     //게임 종료
+    function GameEnd() {
+        document.getElementById("finalScore").textContent = score;
+        console.log("모달오픈")
+        //$("#gameOverModal").show();
+        $("#gameOverModal").modal('show');
+    }
+
+    // 모달 닫기 이벤트
+    $('#gameOverModal').on('hidden.bs.modal', function () {
+        // 게임 상태 초기화
+        initDataSetting(); // 게임 데이터 초기화
+        initObject(); // 오브젝트 초기화
+        introDiv.style.display = 'block';
+        playDiv.style.display = 'none';
+    });
+
     
     /******************************이벤트 관리**********************************/
 
@@ -381,10 +399,17 @@ $(document).ready(function(){
         
         //블럭을 모두 부셨을때 로직
         if(blocks.length==0){
+            if(level==5){
+                console.log("게임 종료");
+                GameEnd();
+                return;
+            }
+            else{
             level = (level+1<=maxStage)?level+1:level;
             initDataSetting(level,score,scoreGap,3); //다음 레벨 설정
             initObject();
             console.log("Win");
+            }
         }
 
         //충돌 처리
