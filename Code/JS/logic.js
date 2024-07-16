@@ -22,9 +22,27 @@ $(document).ready(function(){
             playDiv.style.display = 'none';
         }
     }
+
+    //다음 단계 이동
+    function nextGame(){
+        level = (level+1<=maxStage)?level+1:level;
+        initDataSetting(level,score,scoreGap,life,maxLife); //다음 게임 설정
+        initObject();
+        $(".stage").text(level);
+        introDiv.style.display = 'block';
+        playDiv.style.display = 'none';
+    }
+
     //게임오버화면
+    
     //일시정지
     const pauseBtn = document.querySelector('#btnPause');
+    pauseBtn.addEventListener("click",gamePause);
+    function gamePause(){
+        pause = pause?false:true;
+        if(!pause){ update(); pauseBtn.innerText="Pause"; }
+        else pauseBtn.innerText="Resume";
+    }
 
     //다시시작
     const replayBtn = document.querySelector('#btnReplay');
@@ -36,8 +54,8 @@ $(document).ready(function(){
     /******************************게임 설정 데이터**********************************/
     let maxLife = null; let life = null; 
     let score = null; let scoreGap = null;
-    let level = null; let velocity = 5.0;
-    const maxStage=Block.color.length;
+    let level = null; const maxStage=Block.color.length; //최대 스테이지 수
+    let pause = false;
 
     function addScore(){
         score += scoreGap;
@@ -49,11 +67,11 @@ $(document).ready(function(){
         $("#life").text(life);
     }
 
-    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iMaxLife=8){
+    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iLife=8,iMaxLife=8){
         maxLife = iMaxLife;
         $("#max_life").text(maxLife);
         
-        life = maxLife;
+        life = iLife;
         $("#life").text(life);
         
         score = iScore
@@ -62,6 +80,7 @@ $(document).ready(function(){
 
         level = iLevel;
         $("#stage").text(level);
+        $(".stage").text(level);
     }
     initDataSetting();    
 
@@ -70,7 +89,8 @@ $(document).ready(function(){
     let ball = null; let dirVec = null; 
     let paddle = null; let blocks = null;
     let objects = []; //모든 오브젝트 
-    const maxRadius = 99999999;
+    const maxRadius = 99999999; 
+    let velocity = 5.0;
 
     //공의 위치 초기화
     function initBallPosition(){
@@ -139,6 +159,7 @@ $(document).ready(function(){
         // 게임 상태 초기화
         initDataSetting(); // 게임 데이터 초기화
         initObject(); // 오브젝트 초기화
+        update();
         introDiv.style.display = 'block';
         playDiv.style.display = 'none';
     });
@@ -399,16 +420,14 @@ $(document).ready(function(){
         
         //블럭을 모두 부셨을때 로직
         if(blocks.length==0){
-            if(level==5){
+            if(level==maxStage){
                 console.log("게임 종료");
                 GameEnd();
                 return;
             }
             else{
-            level = (level+1<=maxStage)?level+1:level;
-            initDataSetting(level,score,scoreGap,3); //다음 레벨 설정
-            initObject();
-            console.log("Win");
+                console.log("Clear");
+                nextGame();   
             }
         }
 
@@ -417,7 +436,8 @@ $(document).ready(function(){
         
         //방향 변경
         ball.point = ball.point.add(dirVec);
-        requestAnimationFrame(update);
+        if(!pause)
+            requestAnimationFrame(update);
     }
     update();
 });
