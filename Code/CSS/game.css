@@ -4,25 +4,43 @@
     box-sizing: border-box;
     text-align: center;
 }
+.intro{
+    display: block;
+}
+#introinfo{
+    padding-top: 250px;
+}
+#introinfo p{
+    font-size:x-large;
+    font-weight: bold;
+}
+#btnPlay{
+    width: 100px;
+}
 #info{
     display: grid;
     justify-content: center;
-    grid-template-columns: 250px 250px;
-    border: 1px solid #ccc;
+    grid-template-columns: 70px 210px 210px;
+}
+#info div{
+    background: rgba(255, 115, 0, 0.05);
+    margin-top: 5px;
+}
+.play{
+    display: none;
 }
 .canvas{
-    width : 580px;
-    height : 500px;
-    background: #ccc;
+    width : 540px;
+    height : 480px;
+    background: rgba(255, 115, 0, 0.156);
     border-radius: 20px;
     display: block;
     margin: 10px auto;
 }
 .wall {
-    /* 계산 시 offset이 달라져서 content-box로 적용합니다. */ 
     box-sizing: content-box; 
     border: 2px solid #000; /* 검정색 테두리 */
-    width: 400px;
+    width: 420px;
     height: 420px;
     /* position: relative;*/
     margin: 10px auto;
