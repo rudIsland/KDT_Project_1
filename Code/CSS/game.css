@@ -1,21 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap');
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     text-align: center;
 }
+.title{
+    font-family: 'Zen Dots', sans-serif;
+}
 .intro{
     display: block;
 }
 #introinfo{
-    padding-top: 250px;
+    padding-top: 200px;
 }
 #introinfo p{
     font-size:x-large;
     font-weight: bold;
 }
-#btnPlay{
+#btnPlay, #btnPause, #btnReplay{
     width: 100px;
+    font-family: 'Zen Dots', sans-serif;
 }
 #info{
     display: grid;
