@@ -41,8 +41,7 @@
             <canvas class="wall" id="wall"></canvas>
             <br>
         </div>
-        <button id="btnPause" class="btn btn-outline-primary">Pause</button>
-        <button id="btnReplay" class="btn btn-outline-primary">Replay</button><!--버튼 : 부트스트랩 디자인-->
+        <!--<button id="btnPause" class="btn btn-outline-primary">Pause</button>-->
     </div><!--플레이화면 : replay 클릭 시 인트로 화면으로-->
 
     <!--게임 종료시 모달박스-->
@@ -61,7 +60,27 @@
             </div>
         </div>
     </div>
-
+    <!--escape_key pause control-->
+    <div class="modal fade" id="gameOptModal">
+        <div class="modal-dialog modal-lg modal-dialog-centered" style="width:40%;">
+            <div class="modal-content">
+                <div class="modal-header m-auto">
+                    <h4 class="modal-title">Options</h4>
+                </div>
+                <div class="modal-body modal-lg">
+                    <div>
+                        <label class="velocity">Velocity</label>
+                        <input type="range" class="form-range" id="velocity" name="points" min="1" value="5" max="10">
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <!--버튼 : 부트스트랩 디자인-->
+                    <!--<button type="button" id="btnPause" class="btn btn-outline-primary" data-bs-dismiss="modal">Resume</button>-->
+                    <button type="button" id="btnReplay" class="btn btn-outline-primary" data-bs-dismiss="modal">Replay</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script type="module" src="./JS/logic.js"></script>
 </body>
 </html>

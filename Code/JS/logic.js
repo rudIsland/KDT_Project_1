@@ -23,6 +23,11 @@ $(document).ready(function(){
         }
     }
 
+    //intro화면 여부
+    function isDisplayIntro(){
+        return introDiv.style.display==="none"?false:true;
+    }
+
     //다음 단계 이동
     function nextGame(){
         level = (level+1<=maxStage)?level+1:level;
@@ -36,12 +41,12 @@ $(document).ready(function(){
     //게임오버화면
     
     //일시정지
-    const pauseBtn = document.querySelector('#btnPause');
-    pauseBtn.addEventListener("click",gamePause);
-    function gamePause(){
+    //const pauseBtn = document.querySelector('#btnPause');
+    //pauseBtn.addEventListener("click",gamePause);
+    function gamePause(){ // ESC => 이벤트
         pause = pause?false:true;
-        if(!pause){ update(); pauseBtn.innerText="Pause"; }
-        else pauseBtn.innerText="Resume";
+        if(!pause){ update(); $("#gameOptModal").modal('hide'); }
+        else{ $("#gameOptModal").modal('show'); }
     }
 
     //다시시작
@@ -55,8 +60,7 @@ $(document).ready(function(){
     let maxLife = null; let life = null;
     let score = null; let scoreGap = null;
     let level = null; const maxStage=Block.color.length; //최대 스테이지 수
-    let pause = false;
-    let BoundsCount=0;
+    let pause = false; let BoundsCount=0;
 
     function addScore(){
         score += scoreGap+BoundsCount;
@@ -129,8 +133,8 @@ $(document).ready(function(){
 
         //벽돌
         blocks = new Array();
-        let max_row = 2;
-        let max_col = 1;
+        let max_row = 3;
+        let max_col = 7;
         //max_col+1개의 gap
         let gap = canvas.width*0.0123; 
         let width = (canvas.width-(gap*(max_col+1)))/max_col;
@@ -171,6 +175,13 @@ $(document).ready(function(){
         playDiv.style.display = 'none';
     });
 
+    //속도 조절 슬라이더
+    $("#velocity").on("input change", function() {
+        velocity=parseInt($("#velocity").val());
+        if(dirVec!=null){
+            dirVec=dirVec.normalize().mul(velocity);
+        }
+    });
     
     /******************************이벤트 관리**********************************/
 
@@ -196,6 +207,9 @@ $(document).ready(function(){
         }
         else if (e.key === "Left" || e.key === "ArrowLeft") {
             leftPressed = false;
+        }
+        if(e.key==="Escape" && !isDisplayIntro()){
+            gamePause();
         }
     }
 
