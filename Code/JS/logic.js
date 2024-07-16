@@ -52,14 +52,22 @@ $(document).ready(function(){
     }
     
     /******************************게임 설정 데이터**********************************/
-    let maxLife = null; let life = null; 
+    let maxLife = null; let life = null;
     let score = null; let scoreGap = null;
     let level = null; const maxStage=Block.color.length; //최대 스테이지 수
     let pause = false;
+    let BoundsCount=0;
 
     function addScore(){
-        score += scoreGap;
+        score += scoreGap+BoundsCount;
+        BoundsCount = 0; // 벽돌을 부술 때 점수에 반영 후 초기화
         $("#score").text(score);
+    }
+
+    function addClearScore(){
+        score *= life;
+        $("#score").text(score);
+        BoundsCount=0;
     }
 
     function cutLife(){
@@ -121,8 +129,8 @@ $(document).ready(function(){
 
         //벽돌
         blocks = new Array();
-        let max_row = 3;
-        let max_col = 7;
+        let max_row = 2;
+        let max_col = 1;
         //max_col+1개의 gap
         let gap = canvas.width*0.0123; 
         let width = (canvas.width-(gap*(max_col+1)))/max_col;
@@ -150,7 +158,6 @@ $(document).ready(function(){
     function GameEnd() {
         document.getElementById("finalScore").textContent = score;
         console.log("모달오픈")
-        //$("#gameOverModal").show();
         $("#gameOverModal").modal('show');
     }
 
@@ -300,10 +307,12 @@ $(document).ready(function(){
         if (ball.point.x + dirVec.x > canvas.width - ball.radius 
             || ball.point.x + dirVec.x < ball.radius) 
         {
+            BoundsCount++;
             dirVec.x = -dirVec.x; //dx = -dx
         }
         //위쪽 벽
         if (canvas.height - ball.radius < ball.point.y + dirVec.y) {
+            BoundsCount++;
             dirVec.y = -dirVec.y; //dy = -dy
         } 
         //아래쪽 벽
@@ -311,10 +320,13 @@ $(document).ready(function(){
             if (ball.point.x > paddle.point.x-error && ball.point.x < paddle.point.x + paddle.width +error) {
                 dirVec.y = -dirVec.y;
             } else { //만약 패들 밑 바닥에 부딪힐경우 이벤트
+                BoundsCount=0;
                 cutLife();
-                if(life==0){
-                    initDataSetting(); //게임 데이터 초기화
-                    initObject(); //오브젝트 초기화
+                if(life==0){ //생명력 0이면 게임종료 끝내기
+                    GameEnd();
+                    return;
+                    //initDataSetting(); //게임 데이터 초기화
+                    //initObject(); //오브젝트 초기화
                 }
                 else
                     initBallPosition(); //공의 위치
@@ -420,6 +432,7 @@ $(document).ready(function(){
         
         //블럭을 모두 부셨을때 로직
         if(blocks.length==0){
+            addClearScore(); // 클리어 시 점수 업데이트
             if(level==maxStage){
                 console.log("게임 종료");
                 GameEnd();
