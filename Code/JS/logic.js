@@ -3,7 +3,7 @@ import {GameObject, Ball, Paddle, Block, Line, Vector2D} from "./object.js"
 $(document).ready(function(){
     const canvas = document.getElementById("wall");
     const ctx = canvas.getContext("2d");
-    canvas.width = 400; //css와 비율 맞춤
+    canvas.width = 420; //css와 비율 맞춤
     canvas.height = 420;
     
     /******************************게임 실행 관련 이벤트**********************************/
@@ -36,7 +36,8 @@ $(document).ready(function(){
     /******************************게임 설정 데이터**********************************/
     let maxLife = null; let life = null; 
     let score = null; let scoreGap = null;
-    let level = 1; let velocity = 5.0;
+    let level = null; let velocity = 5.0;
+    const maxStage=Block.color.length;
 
     function addScore(){
         score += scoreGap;
@@ -48,17 +49,19 @@ $(document).ready(function(){
         $("#life").text(life);
     }
 
-    function initDataSetting(){
-        maxLife = 3;
+    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iMaxLife=3){
+        maxLife = iMaxLife;
         $("#max_life").text(maxLife);
         
         life = maxLife;
         $("#life").text(life);
         
-        score = 0;
+        score = iScore
         $("#score").text(score);
-        
-        scoreGap = 1;
+        scoreGap = iScoreGap;
+
+        level = iLevel;
+        $("#stage").text(level);
     }
     initDataSetting();    
 
@@ -100,7 +103,7 @@ $(document).ready(function(){
         blocks = new Array();
         let max_row = 3;
         let max_col = 7;
-        //max_col+1개의 gap : canvas_width*0.1
+        //max_col+1개의 gap
         let gap = canvas.width*0.0123; 
         let width = (canvas.width-(gap*(max_col+1)))/max_col;
         let height = canvas.height*0.05;
@@ -201,6 +204,12 @@ $(document).ready(function(){
     },false);
 
     /******************************충돌 관리**********************************/
+    //두 점 사이 거리 구하기
+    function getDistAtoB(sx,sy,ex,ey){
+        let result = Math.sqrt(Math.pow(sx-ex,2)+Math.pow(sy-ey,2));
+        return result;
+    }
+
     //벽돌과 공의 충돌 감지
     function detectCollideWithBlock(ball,block){
         // 벽돌 영역의 경계
@@ -209,55 +218,40 @@ $(document).ready(function(){
         let blockTop = block.point.y;
         let blockBottom = block.point.y-block.height;
 
-        //공의 중점과 영역 사이의 가까운 거리 구하기
-        let nearX = Math.max(blockLeft,Math.min(ball.point.x,blockRight));
-        let nearY = Math.max(blockBottom,Math.min(ball.point.y,blockTop));
+        //상하좌우 영역 충돌 조건
+        //Bottom
+        if(blockLeft<=ball.point.x&&ball.point.x<=blockRight&&
+            blockBottom-ball.radius<=ball.point.y&&ball.point.y<=blockBottom)
+            return "collide_tb"; 
+        //Left
+        else if(blockLeft-ball.radius<=ball.point.x&&ball.point.x<=blockLeft&&
+            blockBottom<=ball.point.y&&ball.point.y<=blockTop)
+            return "collide_lr";
+        //Right
+        else if(blockRight<=ball.point.x&&ball.point.x<=blockRight+ball.radius&&
+            blockBottom<=ball.point.y&&ball.point.y<=blockTop)
+                return "collide_lr";
+        //Top
+        else if(blockLeft<=ball.point.x&&ball.point.x<=blockRight&&
+            blockTop<=ball.point.y&&ball.point.y<=blockTop+ball.radius)
+                return "collide_tb";
 
-        //공의 중심과 벽돌 사이의 거리
-        let distX = ball.point.x - nearX; //경계 사이에 존재하면 0
-        let distY = ball.point.y - nearY;
-        //상하좌우 영역 거리
-        let dist = Math.sqrt(Math.pow(distX,2)+Math.pow(distY,2));
-        
-        //각 모서리와의 거리 지정
-        
-        const maxVal = maxRadius+1;
-        let tl = (ball.point.x<=blockLeft&&ball.point.y>=blockTop)
-            ?Math.sqrt(Math.pow(ball.point.x - blockLeft, 2) + Math.pow(ball.point.y - blockTop, 2)):maxVal;
-        let tr = (ball.point.x>=blockRight&&ball.point.y>=blockTop)
-            ?Math.sqrt(Math.pow(ball.point.x - blockRight, 2) + Math.pow(ball.point.y - blockTop, 2)):maxVal;
-        let bl = (ball.point.x<=blockLeft&&ball.point.y<=blockBottom)
-            ?Math.sqrt(Math.pow(ball.point.x - blockLeft, 2) + Math.pow(ball.point.y - blockBottom, 2)):maxVal;
-        let br = (ball.point.x>=blockRight&&ball.point.y<=blockBottom)
-            ?Math.sqrt(Math.pow(ball.point.x - blockRight, 2) + Math.pow(ball.point.y - blockBottom, 2)):maxVal;
-        
-            //모서리 지점과의 거리
-        let cornerDist = [ tl,tr,bl,br ];
-        let isCornerCollision = cornerDist.some((cdist)=> cdist <= ball.radius);
-        
-        //충돌 판정 : 상하좌우 충돌 | 모서리 충돌
-        if(dist<=ball.radius || isCornerCollision ){ 
-            //모서리 충돌 처리코드
-            if(isCornerCollision){
-                return "collide_corn";
-            }
-
-            //공의 이동 방향
-            let movedLeft = ball.point.x - blockLeft;
-            let movedRight = blockRight - ball.point.x;
-            let movedBottom = ball.point.y - blockBottom;
-            let movedTop = blockTop - ball.point.y;
-            let movedMin = Math.min(movedLeft, movedRight,movedTop,movedBottom);
-            
-            //좌우 충돌 감지
-            if (movedMin == movedLeft || movedMin == movedRight) 
-                return "collide_lr"; 
-            //상하 충돌 감지
-            else if(movedMin == movedTop || movedMin == movedBottom) 
-                return "collide_tb"; 
-        }
-        else
-            false;
+        //모서리 영역 충돌 조건
+        //LT,RT,LB,RB
+        let distLT = getDistAtoB(ball.point.x,ball.point.y,blockLeft,blockTop);
+        let distRT = getDistAtoB(ball.point.x,ball.point.y,blockRight,blockTop);
+        let distLB = getDistAtoB(ball.point.x,ball.point.y,blockLeft,blockBottom);
+        let distRB = getDistAtoB(ball.point.x,ball.point.y,blockRight,blockBottom);
+        let judgment = ball.radius;
+        if(distLT <= judgment)
+            return "collide_lt"; 
+        else if(distRT <= judgment)
+            return "collide_rt"; 
+        else if(distLB <= judgment)
+            return "collide_lb"
+        else if(distRB <= judgment)
+            return "collide_rb"
+        return false;
     }
 
     //충돌 처리
@@ -306,12 +300,54 @@ $(document).ready(function(){
                 if(collision == "collide_lr"){ //좌우 충돌
                     dirVec.x = -dirVec.x;
                 }
-                else if("collide_tb"){ //상하 충돌
+                else if(collision=="collide_tb"){ //상하 충돌
                     dirVec.y = -dirVec.y;
                 }
-                else{ //모서리 충돌
-                    dirVec.x = -dirVec.x;
-                    dirVec.y = -dirVec.y;
+                else{ //모서리 충돌 시 방향 지정
+                    if(collision == "collide_lt")
+                    {
+                        if(dirVec.x<0&&dirVec.y<0)
+                            dirVec.y = -dirVec.y;
+                        else if(dirVec.x>=0&&dirVec.y>=0)
+                            dirVec.x = -dirVec.x;
+                        else{
+                            dirVec.x = -dirVec.x;
+                            dirVec.y = -dirVec.y;
+                        }
+                    }
+                    else if(collision == "collide_rt")
+                    {
+                        if(dirVec.x>=0&&dirVec.y<0)
+                            dirVec.y = -dirVec.y;
+                        else if(dirVec.x<0&&dirVec.y>=0)
+                            dirVec.x = -dirVec.x;
+                        else{
+                            dirVec.x = -dirVec.x;
+                            dirVec.y = -dirVec.y;
+                        }
+                    }
+                    else if(collision == "collide_lb")
+                    {
+                        if(dirVec.x<0&&dirVec.y>=0)
+                            dirVec.y = -dirVec.y;
+                        else if(dirVec.x>=0&&dirVec.y<0)
+                            dirVec.x = -dirVec.x;
+                        else{
+                            dirVec.x = -dirVec.x;
+                            dirVec.y = -dirVec.y;
+                        }
+                    }
+                    else if(collision == "collide_rb")
+                    {
+                        if(dirVec.x>=0&&dirVec.y>=0)
+                            dirVec.y = -dirVec.y;
+                        else if(dirVec.x<0&&dirVec.y<0)
+                            dirVec.x = -dirVec.x;
+                        else{
+                            dirVec.x = -dirVec.x;
+                            dirVec.y = -dirVec.y;
+                        }
+                    }
                 }
                 block.life--; // 벽돌 생명력 감소
                 if(block.life <= 0) { //벽돌의 생명이 다할경우
@@ -329,7 +365,6 @@ $(document).ready(function(){
     }
     /******************************canvas 그리기**********************************/
 
-    //draw -> update 수정
     function update(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         //그리기 위한 모든 오브젝트를 canvas 좌표계로 변환 
@@ -338,16 +373,16 @@ $(document).ready(function(){
             object.draw(ctx);
         });
 
-        if(lineDir){ //방향선
+        if(lineDir) //방향선
             lineDir.draw(ctx);
-        }
         
         //값의 변경을 위해 LB 좌표계로 변환
         GameObject.mapCoordCanvas2LBFromList(canvas,objects);
         
         //블럭을 모두 부셨을때 로직
         if(blocks.length==0){
-            level++;
+            level = (level+1<=maxStage)?level+1:level;
+            initDataSetting(level,score,scoreGap,3); //다음 레벨 설정
             initObject();
             console.log("Win");
         }
