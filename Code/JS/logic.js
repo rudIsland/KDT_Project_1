@@ -79,7 +79,7 @@ $(document).ready(function(){
         $("#life").text(life);
     }
 
-    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iLife=4,iMaxLife=8){
+    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iLife=5,iMaxLife=5){
         maxLife = iMaxLife;
         $("#max_life").text(maxLife);
         
