@@ -1,5 +1,5 @@
 import { Vector2D } from "./vector.js"
-export { GameObject, Ball, Paddle, Block, Line, Vector2D };
+export { GameObject, Ball, Paddle, Block, Line, Vector2D, Item };
 
 class GameObject{
     constructor(x,y){
@@ -180,5 +180,39 @@ class Line extends GameObject{
         ctx.strokeStyle = this.color;
         ctx.stroke();
         ctx.closePath();
+    }
+}
+
+/************************* Item ********************************/
+class Item extends GameObject{
+    constructor(x, y, width, height, color, itemType, speed) {
+        super(x, y);
+        this.width = width;
+        this.height = height;
+        this.color = color;
+        this.speed = speed;
+        this.type=itemType;
+        this.active = true;
+    }
+
+    draw(ctx) {
+        if (!this.active) return;
+        ctx.beginPath();
+        ctx.rect(this.point.x, this.point.y, this.width, this.height);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    update() {
+        if (!this.active) return;
+        this.point.y -= this.speed; // 아래로 떨어짐
+        if (this.point.y < 0) {
+            this.active = false; // 화면 밖으로 나가면 비활성화
+        }
+    }
+
+    deactivate() {
+        this.active = false;
     }
 }

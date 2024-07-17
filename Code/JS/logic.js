@@ -1,4 +1,4 @@
-import {GameObject, Ball, Paddle, Block, Line, Vector2D} from "./object.js"
+import {GameObject, Ball, Paddle, Block, Line, Vector2D, Item} from "./object.js"
 
 $(document).ready(function(){
     const canvas = document.getElementById("wall");
@@ -79,7 +79,7 @@ $(document).ready(function(){
         $("#life").text(life);
     }
 
-    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iLife=8,iMaxLife=8){
+    function initDataSetting(iLevel=1,iScore=0,iScoreGap=1,iLife=4,iMaxLife=8){
         maxLife = iMaxLife;
         $("#max_life").text(maxLife);
         
@@ -100,6 +100,7 @@ $(document).ready(function(){
 
     let ball = null; let dirVec = null; 
     let paddle = null; let blocks = null;
+    let items = []; // 아이템 배열 추가
     let objects = []; //모든 오브젝트 
     const maxRadius = 99999999; 
     let velocity = 5.0;
@@ -182,6 +183,19 @@ $(document).ready(function(){
             dirVec=dirVec.normalize().mul(velocity);
         }
     });
+
+    function spawnItem(block) {
+        console.log("아이템 생성");
+        let probability = Math.random();
+        if (probability < 0.15) { // 15% 확률로 아이템 생성
+            let itemType = probability < 0.075 ? "life" : "reset";
+            let itemColor = itemType === "life" ? "#ff0000" : "#0000ff"; // 빨간색: 생명력, 파란색: 위치 초기화
+            let item = new Item(block.point.x, block.point.y, 20, 20, itemColor, itemType, 1); // 속도 2로 설정
+            items.push(item);
+            objects.push(item);
+            console.log(`아이템 생성됨: ${itemType} at (${item.point.x}, ${item.point.y})`);
+        }
+    }
     
     /******************************이벤트 관리**********************************/
 
@@ -262,6 +276,8 @@ $(document).ready(function(){
             lineDir = null;
         }
     },false);
+
+    
 
     /******************************충돌 관리**********************************/
     //두 점 사이 거리 구하기
@@ -429,7 +445,41 @@ $(document).ready(function(){
             let block=blocks.splice(brokenBlockIndex,1)[0];
             brokenBlockIndex=objects.indexOf(block);
             objects.splice(brokenBlockIndex,1);
+            spawnItem(block); // 아이템 생성
         }
+    }
+
+    //아이템이 받침대와 충돌했는지 여부
+    function checkItemCollision() {
+        items.forEach((item, index) => {
+            if (item.active && paddle.point.x < item.point.x + item.width &&
+                paddle.point.x + paddle.width > item.point.x &&
+                paddle.point.y < item.point.y + item.height &&
+                paddle.point.y + paddle.height > item.point.y) {
+                item.deactivate();
+                items.splice(index, 1);
+                objects.splice(objects.indexOf(item), 1);
+                applyItemEffect(item.type);
+            }
+        });
+    }
+
+    function applyItemEffect(type) {
+        if (type === "life") {
+            LifeItem();
+        } else if (type === "reset") {
+            BallResetItem();
+        }
+    }
+    
+    function LifeItem(){ //생명력 아이템
+        life +=1;
+        $("#life").text(life);
+    }
+    
+    function BallResetItem(){ //볼 위치 초기화 아이템
+        initBallPosition();
+        dirVec = new Vector2D(0, 0);
     }
     /******************************canvas 그리기**********************************/
 
@@ -463,6 +513,12 @@ $(document).ready(function(){
 
         //충돌 처리
         detectCollision(); 
+
+        // 아이템 업데이트 및 충돌 처리
+        items.forEach((item) => {
+            item.update();
+        });
+        checkItemCollision();
         
         //방향 변경
         ball.point = ball.point.add(dirVec);
