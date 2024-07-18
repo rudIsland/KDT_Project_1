@@ -41,8 +41,6 @@ $(document).ready(function(){
     //게임오버화면
     
     //일시정지
-    //const pauseBtn = document.querySelector('#btnPause');
-    //pauseBtn.addEventListener("click",gamePause);
     function gamePause(){ // ESC => 이벤트
         pause = pause?false:true;
         if(!pause){ update(); $("#gameOptModal").modal('hide'); }
@@ -330,6 +328,14 @@ $(document).ready(function(){
         return false;
     }
 
+    //반사각 벡터 구하기
+    function getReflectVector(v,n){
+        let inv = v.mul(-1); //-v
+        let result = n.mul(inv.dot(n)*2); //2(-v dot n)*n
+        result = v.add(result).mul(velocity);
+        return result.copy();
+    }
+
     //충돌 처리
     function detectCollision(){ 
         let error = 35; /* 판정 오차 값 */
@@ -355,8 +361,6 @@ $(document).ready(function(){
                 if(life==0){ //생명력 0이면 게임종료 끝내기
                     GameEnd();
                     return;
-                    //initDataSetting(); //게임 데이터 초기화
-                    //initObject(); //오브젝트 초기화
                 }
                 else
                     initBallPosition(); //공의 위치
@@ -386,6 +390,7 @@ $(document).ready(function(){
                     dirVec.y = -dirVec.y;
                 }
                 else{ //모서리 충돌 시 방향 지정
+                    let v = dirVec.normalize(); //단위벡터
                     if(collision == "collide_lt")
                     {
                         if(dirVec.x<0&&dirVec.y<0)
@@ -393,8 +398,9 @@ $(document).ready(function(){
                         else if(dirVec.x>=0&&dirVec.y>=0)
                             dirVec.x = -dirVec.x;
                         else{
-                            dirVec.x = -dirVec.x;
-                            dirVec.y = -dirVec.y;
+                            let n = new Vector2D(-1,1).normalize(); //법선벡터
+                            let rv = getReflectVector(v,n); //반사벡터
+                            dirVec = rv;
                         }
                     }
                     else if(collision == "collide_rt")
@@ -404,8 +410,9 @@ $(document).ready(function(){
                         else if(dirVec.x<0&&dirVec.y>=0)
                             dirVec.x = -dirVec.x;
                         else{
-                            dirVec.x = -dirVec.x;
-                            dirVec.y = -dirVec.y;
+                            let n = new Vector2D(1,1).normalize(); //법선벡터
+                            let rv = getReflectVector(v,n); //반사벡터
+                            dirVec = rv;
                         }
                     }
                     else if(collision == "collide_lb")
@@ -415,8 +422,9 @@ $(document).ready(function(){
                         else if(dirVec.x>=0&&dirVec.y<0)
                             dirVec.x = -dirVec.x;
                         else{
-                            dirVec.x = -dirVec.x;
-                            dirVec.y = -dirVec.y;
+                            let n = new Vector2D(-1,-1).normalize(); //법선벡터
+                            let rv = getReflectVector(v,n); //반사벡터
+                            dirVec = rv;
                         }
                     }
                     else if(collision == "collide_rb")
@@ -426,8 +434,9 @@ $(document).ready(function(){
                         else if(dirVec.x<0&&dirVec.y<0)
                             dirVec.x = -dirVec.x;
                         else{
-                            dirVec.x = -dirVec.x;
-                            dirVec.y = -dirVec.y;
+                            let n = new Vector2D(1,-1).normalize(); //법선벡터
+                            let rv = getReflectVector(v,n); //반사벡터
+                            dirVec = rv;
                         }
                     }
                 }
