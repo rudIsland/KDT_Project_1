@@ -55,65 +55,64 @@ class GameObject{
 }
 
 /* 공 */
-class Ball extends GameObject{
-    constructor(x,y,r,color){
-        super(x,y);
+class Ball extends GameObject {
+    constructor(x, y, r, color) {
+        super(x, y);
         this.radius = r;
-        this.color = color
+        this.color = color;
     }
 
-    draw(ctx){
+    draw(ctx) {
         ctx.beginPath();
         ctx.arc(this.point.x, this.point.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
         ctx.closePath();
     }
 }
 
 /* 받침대 */
-class Paddle extends GameObject{
-    constructor(x,y,width,height,color){
-        super(x,y);
+class Paddle extends GameObject {
+    constructor(x, y, width, height, color) {
+        super(x, y);
         this.width = width;
         this.height = height;
         this.color = color;
     }
 
-    draw(ctx){
+    draw(ctx) {
         ctx.beginPath();
         ctx.rect(this.point.x, this.point.y, this.width, this.height);
         ctx.fillStyle = this.color;
         ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
         ctx.closePath();
     }
 }
 
 /* 벽돌 */
-class Block extends GameObject{
-    constructor(x,y,width,height,life){
-        super(x,y);
+class Block extends GameObject {
+    constructor(x, y, width, height, life) {
+        super(x, y);
         this.width = width;
         this.height = height;
         this.life = life;
-        this.hit=false;
+        this.hit = false;
+        this.scale = 1.0;
     }
     //생명 종속
-    static color = ["#007bff","#8ed973","#fc932a","#ff9393","#78206e"];
+    static color = ["#007bff", "#8ed973", "#fc932a", "#ff9393", "#78206e"];
 
-    setLife(value){
-        this.life=value;
+    setLife(value) {
+        this.life = value;
     }
 
-    draw(ctx){
-        //기존 코드
-        /*ctx.beginPath();
-        ctx.rect(this.point.x, this.point.y, this.width, this.height);
-        ctx.fillStyle = Block.color[this.life-1];
-        ctx.fill();
-        ctx.closePath();*/
-
-
+    draw(ctx) {
         ctx.save();
         ctx.translate(this.point.x + this.width / 2, this.point.y + this.height / 2);
         ctx.scale(this.scale, this.scale);
@@ -122,11 +121,14 @@ class Block extends GameObject{
         ctx.rect(this.point.x, this.point.y, this.width, this.height);
         ctx.fillStyle = Block.color[this.life - 1];
         ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
         ctx.closePath();
         ctx.restore();
 
         if (this.hit) {
-            this.scale = 2.0; // 충돌 시 크기 증가
+            this.scale = 1.8; // 충돌 시 크기 증가
             this.hit = false; // 한 프레임 후에 원래 상태로 되돌림
         } else {
             if (this.scale > 1.0) {
@@ -135,26 +137,26 @@ class Block extends GameObject{
         }
     }
 
-     // 블럭 충돌 함수
-     hitBlock() {
+    // 블럭 충돌 함수
+    hitBlock() {
         this.hit = true;
     }
 }
 
 /* 선 */
-class Line extends GameObject{
-    constructor(sx,sy,ex,ey,color){
-        super(0,0);
-        this.start = new Vector2D(sx,sy);
-        this.end = new Vector2D(ex,ey);
+class Line extends GameObject {
+    constructor(sx, sy, ex, ey, color) {
+        super(0, 0);
+        this.start = new Vector2D(sx, sy);
+        this.end = new Vector2D(ex, ey);
         this.color = color;
     }
 
     //Object의 메서드 오버라이드
-    mapCoordLB2Canvas(canvas){ 
+    mapCoordLB2Canvas(canvas) {
         let start = this.start;
         let end = this.end;
-        if(this.coordinate =="LeftBottom origin"&&typeof canvas == "object"){
+        if (this.coordinate == "LeftBottom origin" && typeof canvas == "object") {
             let height = canvas.height;
             start.y = height - start.y;
             end.y = height - end.y;
@@ -162,36 +164,37 @@ class Line extends GameObject{
         }
     }//change origin LeftBottom to Canvas
 
-    mapCoordCanvas2LB(canvas){
+    mapCoordCanvas2LB(canvas) {
         let start = this.start;
         let end = this.end;
-        if(this.coordinate=="Canvas origin"&&typeof canvas == "object"){
+        if (this.coordinate == "Canvas origin" && typeof canvas == "object") {
             let height = canvas.height;
-            start.y = (start.y - height)*-1;
-            end.y = (end.y - height)*-1;
+            start.y = (start.y - height) * -1;
+            end.y = (end.y - height) * -1;
             this.coordinate = "LeftBottom origin";
         }
     }//change origin Canvas to LeftBottom
 
-    draw(ctx){
+    draw(ctx) {
         ctx.beginPath();
-        ctx.moveTo(this.start.x,this.start.y);
-        ctx.lineTo(this.end.x,this.end.y);
+        ctx.moveTo(this.start.x, this.start.y);
+        ctx.lineTo(this.end.x, this.end.y);
         ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1;
         ctx.stroke();
         ctx.closePath();
     }
 }
 
 /************************* Item ********************************/
-class Item extends GameObject{
+class Item extends GameObject {
     constructor(x, y, width, height, color, itemType, speed) {
         super(x, y);
         this.width = width;
         this.height = height;
         this.color = color;
         this.speed = speed;
-        this.type=itemType;
+        this.type = itemType;
         this.active = true;
     }
 
@@ -201,6 +204,9 @@ class Item extends GameObject{
         ctx.rect(this.point.x, this.point.y, this.width, this.height);
         ctx.fillStyle = this.color;
         ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#000';
+        ctx.stroke();
         ctx.closePath();
     }
 

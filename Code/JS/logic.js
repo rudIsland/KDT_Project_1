@@ -134,8 +134,8 @@ $(document).ready(function(){
 
         //벽돌
         blocks = new Array();
-        let max_row = 1;
-        let max_col = 1;
+        let max_row = 3;
+        let max_col = 7;
         //max_col+1개의 gap
         let gap = canvas.width*0.0123; 
         let width = (canvas.width-(gap*(max_col+1)))/max_col;
