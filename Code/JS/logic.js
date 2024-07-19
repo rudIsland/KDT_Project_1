@@ -58,7 +58,7 @@ $(document).ready(function(){
     let maxLife = null; let life = null;
     let score = null; let scoreGap = null;
     let level = null; const maxStage=Block.color.length; //최대 스테이지 수
-    let pause = false; let BoundsCount=0;
+    let pause = false; let BoundsCount=0; 
 
     function addScore(){
         score += scoreGap+BoundsCount;
@@ -67,7 +67,9 @@ $(document).ready(function(){
     }
 
     function addClearScore(){
-        score *= life;
+        if (life > 0) {
+            score *= life;
+        }
         $("#score").text(score);
         BoundsCount=0;
     }
@@ -132,8 +134,8 @@ $(document).ready(function(){
 
         //벽돌
         blocks = new Array();
-        let max_row = 3;
-        let max_col = 7;
+        let max_row = 1;
+        let max_col = 1;
         //max_col+1개의 gap
         let gap = canvas.width*0.0123; 
         let width = (canvas.width-(gap*(max_col+1)))/max_col;
@@ -166,11 +168,7 @@ $(document).ready(function(){
 
     // 모달 닫기 이벤트
     $('#gameOverModal').on('hidden.bs.modal', function () {
-        // 게임 상태 초기화
-        initDataSetting(); // 게임 데이터 초기화
-        initObject(); // 오브젝트 초기화
-        introDiv.style.display = 'block';
-        playDiv.style.display = 'none';
+        location.reload(); //페이지 새로고침
     });
 
     //속도 조절 슬라이더
@@ -493,6 +491,7 @@ $(document).ready(function(){
     /******************************canvas 그리기**********************************/
 
     function update(){
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         //그리기 위한 모든 오브젝트를 canvas 좌표계로 변환 
         GameObject.mapCoordLB2CanvasFromList(canvas,objects);
@@ -512,6 +511,7 @@ $(document).ready(function(){
             if(level==maxStage){
                 console.log("게임 종료");
                 GameEnd();
+                return;
             }
             else{
                 console.log("Clear");
