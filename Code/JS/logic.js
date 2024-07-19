@@ -58,7 +58,7 @@ $(document).ready(function(){
     let maxLife = null; let life = null;
     let score = null; let scoreGap = null;
     let level = null; const maxStage=Block.color.length; //최대 스테이지 수
-    let pause = false; let BoundsCount=0; 
+    let pause = false; let BoundsCount=0; let gameOver=false;
 
     function addScore(){
         score += scoreGap+BoundsCount;
@@ -161,10 +161,14 @@ $(document).ready(function(){
 
      //게임 종료
     function GameEnd() {
+        gameOver = true; // 게임 종료 상태 설정
         document.getElementById("finalScore").textContent = score;
-        console.log("모달오픈")
+        let scores = saveScore(score);
+        displayScores(scores);
+        console.log("모달 오픈"); // 디버그용 로그
         $("#gameOverModal").modal('show');
     }
+    
 
     // 모달 닫기 이벤트
     $('#gameOverModal').on('hidden.bs.modal', function () {
@@ -180,7 +184,6 @@ $(document).ready(function(){
     });
 
     function spawnItem(block) {
-        console.log("아이템 생성");
         let probability = Math.random();
         if (probability < 0.15) { // 15% 확률로 아이템 생성
             let itemType = probability < 0.075 ? "life" : "reset";
@@ -188,7 +191,39 @@ $(document).ready(function(){
             let item = new Item(block.point.x, block.point.y, 20, 20, itemColor, itemType, 1); // 속도 2로 설정
             items.push(item);
             objects.push(item);
-            console.log(`아이템 생성됨: ${itemType} at (${item.point.x}, ${item.point.y})`);
+            //console.log(`아이템 생성됨: ${itemType} at (${item.point.x}, ${item.point.y})`);
+        }
+    }
+
+
+    /*****순위 표시****/
+    function saveScore(score) {
+        let scores = JSON.parse(localStorage.getItem('scores')) || [];
+        scores.push(score);
+        scores.sort((a, b) => b - a);
+        localStorage.setItem('scores', JSON.stringify(scores));
+        return scores;
+    }
+
+    function displayScores(scores) {
+        const scoresList = document.getElementById('scoresList');
+        scoresList.innerHTML = '';
+        
+        // 상위 10개의 점수 또는 점수 배열의 길이만큼만 표시
+        let scoresToShow = scores.slice(0, 10);
+        scoresToShow.forEach((score, index) => {
+            let scoreItem = document.createElement('li');
+            scoreItem.className = 'list-group-item'; // 부트스트랩 스타일 적용
+            scoreItem.textContent = `${index + 1}. ${score}`;
+            scoresList.appendChild(scoreItem);
+        });
+
+        // 빈 항목 추가
+        for (let i = scoresToShow.length; i < 10; i++) {
+            let emptyItem = document.createElement('li');
+            emptyItem.className = 'list-group-item';
+            emptyItem.textContent = `${i + 1}. -`;
+            scoresList.appendChild(emptyItem);
         }
     }
     
@@ -335,6 +370,8 @@ $(document).ready(function(){
 
     //충돌 처리
     function detectCollision(){ 
+        if (gameOver) return; // 게임이 종료된 경우 충돌 처리하지 않음
+        
         let error = 35; /* 판정 오차 값 */
         //공이 왼쪽 또는 오른쪽 벽에 부딪히면 반대로 가도록 설정
         if (ball.point.x + dirVec.x > canvas.width - ball.radius 
