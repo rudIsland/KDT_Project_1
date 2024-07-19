@@ -73,7 +73,7 @@ $(document).ready(function(){
     }
 
     function cutLife(){
-        life -= 1;
+        life = (life>0)?life-1:life;
         $("#life").text(life);
     }
 
@@ -169,7 +169,6 @@ $(document).ready(function(){
         // 게임 상태 초기화
         initDataSetting(); // 게임 데이터 초기화
         initObject(); // 오브젝트 초기화
-        update();
         introDiv.style.display = 'block';
         playDiv.style.display = 'none';
     });
@@ -482,7 +481,8 @@ $(document).ready(function(){
     }
     
     function LifeItem(){ //생명력 아이템
-        life +=1;
+        if(life<maxLife)
+            life +=1;
         $("#life").text(life);
     }
     
@@ -512,7 +512,6 @@ $(document).ready(function(){
             if(level==maxStage){
                 console.log("게임 종료");
                 GameEnd();
-                return;
             }
             else{
                 console.log("Clear");
