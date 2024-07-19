@@ -49,7 +49,7 @@ body {
 
 .info-item {
     color:#ffffff;
-    background: rgba(0, 123, 255, 0.1);
+    background: rgba(38, 39, 41, 0.507);
     padding: 10px;
     border-radius: 8px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
@@ -88,7 +88,7 @@ body {
 
 /* 받침대 */
 .paddle {
-    border-radius: 10px;
+    border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 

@@ -84,10 +84,18 @@ class Paddle extends GameObject {
     }
 
     draw(ctx) {
+        let gradient = ctx.createLinearGradient(this.point.x, this.point.y, this.point.x + this.width, this.point.y + this.height);
+        gradient.addColorStop(0, '#ff6f61'); // Start color
+        gradient.addColorStop(1, '#d6006b'); // End color
+
         ctx.beginPath();
         ctx.rect(this.point.x, this.point.y, this.width, this.height);
-        ctx.fillStyle = this.color;
+        
+        // Fill with gradient
+        ctx.fillStyle = gradient;
         ctx.fill();
+
+        // Stroke for the border
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#000';
         ctx.stroke();
@@ -105,8 +113,9 @@ class Block extends GameObject {
         this.hit = false;
         this.scale = 1.0;
     }
-    //생명 종속
-    static color = ["#007bff", "#8ed973", "#fc932a", "#ff9393", "#78206e"];
+    
+    // 생명력에 따른 색상 배열
+    static color = ["#b50000", "#f59e33", "#3fad03", "#3941db", "#78206e"];
 
     setLife(value) {
         this.life = value;
@@ -117,14 +126,24 @@ class Block extends GameObject {
         ctx.translate(this.point.x + this.width / 2, this.point.y + this.height / 2);
         ctx.scale(this.scale, this.scale);
         ctx.translate(-(this.point.x + this.width / 2), -(this.point.y + this.height / 2));
+        
+        // Create gradient
+        let gradient = ctx.createLinearGradient(this.point.x, this.point.y, this.point.x + this.width, this.point.y + this.height);
+        gradient.addColorStop(0, this.shadeColor(Block.color[this.life - 1], 30)); // Slightly brighter shade for gradient effect
+        gradient.addColorStop(1, Block.color[this.life - 1]);
+
+        // Draw block
         ctx.beginPath();
         ctx.rect(this.point.x, this.point.y, this.width, this.height);
-        ctx.fillStyle = Block.color[this.life - 1];
+        ctx.fillStyle = gradient;
         ctx.fill();
+
+        // Stroke for the border
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#000';
         ctx.stroke();
         ctx.closePath();
+        
         ctx.restore();
 
         if (this.hit) {
@@ -135,6 +154,18 @@ class Block extends GameObject {
                 this.scale -= 0.1; // 원래 크기로 돌아옴
             }
         }
+    }
+
+    // Helper function to shade a color
+    shadeColor(color, percent) {
+        let num = parseInt(color.slice(1), 16),
+            amt = Math.round(2.55 * percent),
+            R = (num >> 16) + amt,
+            G = (num >> 8 & 0x00FF) + amt,
+            B = (num & 0x0000FF) + amt;
+        return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + 
+                      (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + 
+                      (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1).toUpperCase();
     }
 
     // 블럭 충돌 함수
