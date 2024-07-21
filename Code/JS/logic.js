@@ -75,6 +75,7 @@ $(document).ready(function(){
     }
 
     function cutLife(){
+        BoundsCount=0;
         life = (life>0)?life-1:life;
         $("#life").text(life);
     }
@@ -135,7 +136,7 @@ $(document).ready(function(){
         //벽돌
         blocks = new Array();
         let max_row = 3;
-        let max_col = 1;
+        let max_col = 7;
         //max_col+1개의 gap
         let gap = canvas.width*0.0123; 
         let width = (canvas.width-(gap*(max_col+1)))/max_col;
@@ -390,7 +391,6 @@ $(document).ready(function(){
             if (ball.point.x > paddle.point.x-error && ball.point.x < paddle.point.x + paddle.width +error) {
                 dirVec.y = -dirVec.y;
             } else { //만약 패들 밑 바닥에 부딪힐경우 이벤트
-                BoundsCount=0;
                 cutLife();
                 if(life==0){ //생명력 0이면 게임종료 끝내기
                     GameEnd();
