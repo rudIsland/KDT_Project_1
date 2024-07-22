@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+body {
+    background-color: #e2dede;
+    background-image: url('../Images/BlockBG.jpg');
+    font-family: 'Zen Dots', sans-serif;
+    color: #333;
+}
+
+.title {
+    font-family: 'Zen Dots', sans-serif;
+    color: #f8f6f6;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.intro, .play {
+    display: block;
+}
+
+#introinfo {
+    padding-top: 200px;
+}
+
+#introinfo p {
+    font-size: x-large;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+#btnPlay, #btnReplay {
+    width: 150px;
+    font-family: 'Zen Dots', sans-serif;
+    margin-top: 20px;
+}
+
+#info {
+    display: grid;
+    justify-content: center;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    color:#ffffff;
+    background: rgba(38, 39, 41, 0.507);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.canvas {
+    width: 540px;
+    height: 540px;
+    background: rgba(43, 42, 42, 0.527);
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin: 10px auto;
+}
+
+#introinfo p{
+    color:#ffffff;
+}
+
+.wall {
+    box-sizing: content-box;
+    border: 2px solid #000; /* 검정색 테두리 */
+    width: 420px;
+    height: 420px;
+    margin: 10px auto;
+    background-color: #fcfcfc;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 공 */
+.ball {
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* 받침대 */
+.paddle {
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* 벽돌 */
+.block {
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#stage{
+    color:#ffffff
+}
