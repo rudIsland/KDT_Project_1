@@ -105,6 +105,7 @@ $(document).ready(function(){
     let objects = []; //모든 오브젝트 
     const maxRadius = 99999999; 
     let velocity = 5.0;
+    let paddleVelocity = 7.0;
 
     //공의 위치 초기화
     function initBallPosition(){
@@ -176,12 +177,25 @@ $(document).ready(function(){
         location.reload(); //페이지 새로고침
     });
 
+    //옵션 모달 닫힐 때 게임 재개 (ESC 두 번 누르지 않아도 닫히면 실행)
+    $('#gameOptModal').on('hidden.bs.modal', function () {
+        if(pause){
+            pause = false;
+            update();
+        }
+    });
+
     //속도 조절 슬라이더
     $("#velocity").on("input change", function() {
         velocity=parseInt($("#velocity").val());
         if(dirVec!=null){
             dirVec=dirVec.normalize().mul(velocity);
         }
+    });
+
+    //받침대 속도 조절 슬라이더
+    $("#paddleVelocity").on("input change", function() {
+        paddleVelocity=parseInt($(this).val());
     });
 
     function spawnItem(block) {
@@ -402,11 +416,10 @@ $(document).ready(function(){
         }
 
         //받침대가 벽을 넘지 않도록 조정
-        let paddle_v = 7;
         if (rightPressed && paddle.point.x < canvas.width - paddle.width) {
-            paddle.point = paddle.point.add(new Vector2D(paddle_v,0)); //paddleX += 7;
+            paddle.point = paddle.point.add(new Vector2D(paddleVelocity,0)); //paddleX += paddleVelocity;
         } else if (leftPressed && paddle.point.x > 0) {
-            paddle.point = paddle.point.add(new Vector2D(-paddle_v,0));
+            paddle.point = paddle.point.add(new Vector2D(-paddleVelocity,0));
         }
 
         //block 충돌
